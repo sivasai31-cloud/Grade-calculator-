@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CGPA Calculator – Siva Sai</title>
+
+  <style>
+    :root {
+      --bg1: #050816;
+      --bg2: #141b3f;
+      --accent1: #00f5ff;
+      --accent2: #ff6bff;
+      --accent3: #ffe66b;
+      --text: #f5f7ff;
+      --text-soft: #b5b9ff;
+      --danger: #ff4f6b;
+      --radius-xl: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #30336b, #050816 55%, #02010b);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 520px;
+      background: radial-gradient(circle at top left, #1f234d, #050816);
+      border-radius: 22px;
+      padding: 18px 16px 20px;
+      box-shadow:
+        0 0 25px rgba(0, 245, 255, 0.4),
+        0 0 40px rgba(255, 107, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shell::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at 0 0, rgba(0, 245, 255, 0.4), transparent 55%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .shell > * { position: relative; z-index: 1; }
+
+    .badge-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.7rem;
+      margin-bottom: 6px;
+      color: var(--text-soft);
+    }
+
+    .badge {
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(5, 8, 22, 0.85);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent1);
+      box-shadow: 0 0 12px rgba(0, 245, 255, 1);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h1 span.spark { color: var(--accent3); }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-bottom: 10px;
+    }
+
+    .subtitle b { color: var(--accent3); }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      background: rgba(5, 8, 22, 0.9);
+      padding: 3px;
+      border-radius: 999px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .tab {
+      padding: 6px 4px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-soft);
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: linear-gradient(130deg, var(--accent1), var(--accent2));
+      color: #050816;
+      box-shadow:
+        0 0 15px rgba(0, 245, 255, 0.6),
+        0 0 20px rgba(255, 107, 255, 0.4);
+    }
+
+    .row-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .subject-row {
+      display: grid;
+      grid-template-columns: 1.6fr 0.8fr 0.9fr auto;
+      gap: 5px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    @media (max-width: 420px) {
+      .subject-row {
+        grid-template-columns: 1.5fr 0.8fr 0.9fr auto;
+      }
+    }
+
+    input, select {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(4, 6, 20, 0.96);
+      color: var(--text);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: rgba(181, 185, 255, 0.6);
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent1);
+      box-shadow: 0 0 0 1px rgba(0, 245, 255, 0.5);
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #fff 50%),
+        linear-gradient(135deg, #fff 50%, transparent 50%);
+      background-position: calc(100% - 12px) calc(50% - 2px),
+        calc(100% - 8px) calc(50% - 2px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 22px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-main {
+      background: linear-gradient(130deg, var(--accent1), var(--accent2));
+      color: #050816;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    }
+
+    .btn-ghost {
+      background: rgba(5, 8, 22, 0.9);
+      color: var(--text-soft);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-sm { font-size: 0.7rem; padding: 5px 8px; }
+
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0 6px;
+      flex-wrap: wrap;
+    }
+
+    .hint-text {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .hint-text b { color: var(--accent3); }
+
+    .error {
+      font-size: 0.74rem;
+      min-height: 16px;
+      color: var(--danger);
+      margin-bottom: 6px;
+    }
+
+    .result-card {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top right, rgba(255, 107, 255, 0.32), rgba(6, 7, 20, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .bubble {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: radial-gradient(circle at 30% 20%, var(--accent3), var(--accent2));
+      color: #050816;
+      box-shadow: 0 0 24px rgba(255, 230, 107, 0.7);
+    }
+
+    .bubble small {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.9;
+    }
+
+    .grade-info {
+      font-size: 0.86rem;
+    }
+
+    .grade-info .score {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-bottom: 3px;
+    }
+
+    .grade-info .remark {
+      margin-bottom: 3px;
+    }
+
+    .mini-table {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    .mini-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .mini-table th, .mini-table td {
+      padding: 3px 4px;
+      text-align: left;
+    }
+
+    .mini-table th {
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .mini-table tr:nth-child(odd) { background: rgba(5, 8, 22, 0.8); }
+    .mini-table tr:nth-child(even) { background: rgba(8, 10, 35, 0.8); }
+
+    .footer {
+      margin-top: 10px;
+      font-size: 0.7rem;
+      text-align: center;
+      color: var(--text-soft);
+    }
+
+    .footer b { color: var(--accent3); }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="badge-row">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        CGPA Calculator
+      </div>
+      <div class="badge">Marks & Grades • S/A/B/C/D/E/F</div>
+    </div>
+
+    <h1>
+      Hi Siva Sai
+      <span class="spark">⚡</span>
+    </h1>
+    <p class="subtitle">
+      Choose a mode: <b>Marks</b> (I convert to grade) or <b>Grades</b> (you give grade).
+      Then enter subjects & credits, I’ll handle the CGPA.
+    </p>
+
+    <!-- Mode Tabs -->
+    <div class="mode-tabs">
+      <button class="tab active" id="tabMarks">Marks Mode</button>
+      <button class="tab" id="tabGrades">Grades Mode</button>
+    </div>
+
+    <!-- Marks Mode -->
+    <section id="marksMode">
+      <div class="row-head">
+        <span>Subject • Credits • Marks</span>
+        <span>0–100 → F/E/D/C/B/A/S</span>
+      </div>
+      <div id="marksRows"></div>
+    </section>
+
+    <!-- Grades Mode -->
+    <section id="gradesMode" style="display:none;">
+      <div class="row-head">
+        <span>Subject • Credits • Grade</span>
+        <span>S=10 A=9 B=8 C=7 D=6 E=5 F=0</span>
+      </div>
+      <div id="gradeRows"></div>
+    </section>
+
+    <div class="controls-row">
+      <button class="btn btn-ghost btn-sm" id="addRowBtn">
+        ＋ Add Subject
+      </button>
+      <span class="hint-text">
+        Tip: credits usually 3 or 4. Labs/project may be higher.
+      </span>
+    </div>
+
+    <p class="error" id="errorBox"></p>
+
+    <div class="controls-row">
+      <button class="btn btn-main" id="calcBtn">
+        🎯 Calculate CGPA
+      </button>
+      <span class="hint-text">
+        Long-press CGPA text to copy on mobile.
+      </span>
+    </div>
+
+    <div id="resultArea" class="result-card" style="display:none;">
+      <div class="bubble">
+        <div id="cgpaValue">0.0</div>
+        <small>CGPA</small>
+      </div>
+      <div class="grade-info">
+        <div class="score" id="scoreText">Total Credits: 0</div>
+        <div class="remark" id="remarkText">Start adding your subjects.</div>
+        <div style="font-size:0.72rem; color:var(--text-soft);">
+          Jarvis: Tracking CGPA itself is a power move, Boss. 💙
+        </div>
+      </div>
+    </div>
+
+    <div id="miniTable" class="mini-table" style="display:none;"></div>
+
+    <p class="footer">
+      Built for <b>Siva Sai</b> • Mobile-first neon UI
+    </p>
+  </main>
+
+  <script>
+    // -------- Data & helpers ----------
+    const tabMarks = document.getElementById("tabMarks");
+    const tabGrades = document.getElementById("tabGrades");
+    const marksMode = document.getElementById("marksMode");
+    const gradesMode = document.getElementById("gradesMode");
+    const marksRows = document.getElementById("marksRows");
+    const gradeRows = document.getElementById("gradeRows");
+    const addRowBtn = document.getElementById("addRowBtn");
+    const calcBtn = document.getElementById("calcBtn");
+    const errorBox = document.getElementById("errorBox");
+    const resultArea = document.getElementById("resultArea");
+    const cgpaValue = document.getElementById("cgpaValue");
+    const scoreText = document.getElementById("scoreText");
+    const remarkText = document.getElementById("remarkText");
+    const miniTable = document.getElementById("miniTable");
+
+    let currentMode = "marks"; // "marks" or "grades"
+
+    const gradePoints = { S: 10, A: 9, B: 8, C: 7, D: 6, E: 5, F: 0 };
+
+    function marksToGrade(m) {
+      if (m < 40) return "F";
+      if (m < 50) return "E";
+      if (m < 60) return "D";
+      if (m < 70) return "C";
+      if (m < 80) return "B";
+      if (m < 90) return "A";
+      return "S";
+    }
+
+    function getRemark(cgpa) {
+      if (cgpa >= 9) return "Outstanding! You’re in S/A zone.";
+      if (cgpa >= 8) return "Great! Very strong performance, keep it up.";
+      if (cgpa >= 7) return "Good. One push and you’ll hit 8+.";
+      if (cgpa >= 6) return "Safe zone. Fix weak units to climb higher.";
+      if (cgpa >= 5) return "Below comfort level. Work on core concepts.";
+      return "Critical: focus on clearing backlogs and basics.";
+    }
+
+    // -------- Create rows ----------
+    function createMarksRow(name = "", credits = "", marks = "") {
+      const row = document.createElement("div");
+      row.className = "subject-row";
+
+      const nameInput = document.createElement("input");
+      nameInput.placeholder = "e.g., Java";
+      nameInput.value = name;
+
+      const credInput = document.createElement("input");
+      credInput.type = "number";
+      credInput.min = "0";
+      credInput.step = "1";
+      credInput.placeholder = "Cred";
+      credInput.value = credits;
+
+      const marksInput = document.createElement("input");
+      marksInput.type = "number";
+      marksInput.min = "0";
+      marksInput.max = "100";
+      marksInput.placeholder = "Marks";
+      marksInput.value = marks;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "btn btn-ghost btn-sm";
+      removeBtn.textContent = "✕";
+      removeBtn.type = "button";
+      removeBtn.onclick = () => row.remove();
+
+      row.append(nameInput, credInput, marksInput, removeBtn);
+      marksRows.appendChild(row);
+    }
+
+    function createGradeRow(name = "", credits = "", gradeVal = "S") {
+      const row = document.createElement("div");
+      row.className = "subject-row";
+
+      const nameInput = document.createElement("input");
+      nameInput.placeholder = "e.g., Java";
+      nameInput.value = name;
+
+      const credInput = document.createElement("input");
+      credInput.type = "number";
+      credInput.min = "0";
+      credInput.step = "1";
+      credInput.placeholder = "Cred";
+      credInput.value = credits;
+
+      const gradeSelect = document.createElement("select");
+      ["S","A","B","C","D","E","F"].forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g;
+        opt.textContent = g;
+        if (g === gradeVal) opt.selected = true;
+        gradeSelect.appendChild(opt);
+      });
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "btn btn-ghost btn-sm";
+      removeBtn.textContent = "✕";
+      removeBtn.type = "button";
+      removeBtn.onclick = () => row.remove();
+
+      row.append(nameInput, credInput, gradeSelect, removeBtn);
+      gradeRows.appendChild(row);
+    }
+
+    // Default data
+    createMarksRow("Java", 3, 82);
+    createMarksRow("ADS", 4, 76);
+    createMarksRow("AI", 3, 91);
+    createGradeRow("Java", 3, "A");
+    createGradeRow("ADS", 4, "B");
+    createGradeRow("AI", 3, "S");
+
+    // -------- Mode switching ----------
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === "marks") {
+        marksMode.style.display = "";
+        gradesMode.style.display = "none";
+        tabMarks.classList.add("active");
+        tabGrades.classList.remove("active");
+      } else {
+        marksMode.style.display = "none";
+        gradesMode.style.display = "";
+        tabGrades.classList.add("active");
+        tabMarks.classList.remove("active");
+      }
+      errorBox.textContent = "";
+      resultArea.style.display = "none";
+      miniTable.style.display = "none";
+    }
+
+    tabMarks.onclick = () => setMode("marks");
+    tabGrades.onclick = () => setMode("grades");
+
+    addRowBtn.onclick = () => {
+      if (currentMode === "marks") createMarksRow();
+      else createGradeRow();
+    };
+
+    // -------- Calculate CGPA ----------
+    calcBtn.onclick = () => {
+      const rows =
+        currentMode === "marks"
+          ? Array.from(marksRows.getElementsByClassName("subject-row"))
+          : Array.from(gradeRows.getElementsByClassName("subject-row"));
+
+      if (rows.length === 0) {
+        errorBox.textContent = "Add at least one subject.";
+        resultArea.style.display = "none";
+        miniTable.style.display = "none";
+        return;
+      }
+
+      let totalCredits = 0;
+      let weightedSum = 0;
+      const details = [];
+
+      for (const row of rows) {
+        const inputs = row.querySelectorAll("input, select");
+        const name = inputs[0].value.trim();
+        const credits = Number(inputs[1].value);
+
+        if (!name) {
+          errorBox.textContent = "One of the subjects has empty name.";
+          resultArea.style.display = "none";
+          miniTable.style.display = "none";
+          return;
+        }
+        if (Number.isNaN(credits) || credits <= 0) {
+          errorBox.textContent = "Credits must be a positive number.";
+          resultArea.style.display = "none";
+          miniTable.style.display = "none";
+          return;
+        }
+
+        let marks = null;
+        let grade = null;
+        let gp = null;
+
+        if (currentMode === "marks") {
+          marks = Number(inputs[2].value);
+          if (Number.isNaN(marks) || marks < 0 || marks > 100) {
+            errorBox.textContent = "Marks must be 0–100 for every subject.";
+            resultArea.style.display = "none";
+            miniTable.style.display = "none";
+            return;
+          }
+          grade = marksToGrade(marks);
+          gp = gradePoints[grade];
+        } else {
+          grade = inputs[2].value;
+          gp = gradePoints[grade];
+        }
+
+        totalCredits += credits;
+        weightedSum += gp * credits;
+        details.push({ name, credits, marks, grade });
+      }
+
+      if (totalCredits === 0) {
+        errorBox.textContent = "Total credits cannot be zero.";
+        resultArea.style.display = "none";
+        miniTable.style.display = "none";
+        return;
+      }
+
+      errorBox.textContent = "";
+      const cgpa = weightedSum / totalCredits;
+      const cgpaRounded = cgpa.toFixed(2);
+
+      cgpaValue.textContent = cgpaRounded;
+      scoreText.textContent = "Total Credits: " + totalCredits;
+      remarkText.textContent = getRemark(cgpa);
+      resultArea.style.display = "grid";
+
+      // Mini table
+      let html = "<table><thead><tr><th>Sub</th><th>Cred</th>";
+      html += currentMode === "marks" ? "<th>Marks</th>" : "";
+      html += "<th>Grade</th></tr></thead><tbody>";
+      for (const d of details) {
+        html += "<tr><td>" + d.name + "</td><td>" + d.credits + "</td>";
+        if (currentMode === "marks") html += "<td>" + d.marks + "</td>";
+        html += "<td>" + d.grade + "</td></tr>";
+      }
+      html += "</tbody></table>";
+      miniTable.innerHTML = html;
+      miniTable.style.display = "block";
+    };
+  </script>
+</body>
+</html>
